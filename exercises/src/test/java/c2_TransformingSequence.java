@@ -27,6 +27,7 @@ public class c2_TransformingSequence extends TransformingSequenceBase {
     @Test
     public void transforming_sequence() {
         Flux<Integer> numbersFlux = numerical_service()
+                .map(number -> ++number)
                 //todo change only this line
                 ;
 
@@ -65,7 +66,7 @@ public class c2_TransformingSequence extends TransformingSequenceBase {
     @Test
     public void cast() {
         Flux<String> numbersFlux = object_service()
-                .map(i -> (String) i); //todo: change this line only
+                .cast(String.class); //todo: change this line only
 
 
         StepVerifier.create(numbersFlux)
@@ -80,6 +81,7 @@ public class c2_TransformingSequence extends TransformingSequenceBase {
     @Test
     public void maybe() {
         Mono<String> result = maybe_service()
+                .defaultIfEmpty("no results")
                 //todo: change this line only
                 ;
 
@@ -95,8 +97,10 @@ public class c2_TransformingSequence extends TransformingSequenceBase {
     @Test
     public void sequence_sum() {
         //todo: change code as you need
-        Mono<Integer> sum = null;
-        numerical_service();
+        Mono<Integer> sum = numerical_service()
+                .reduce(Integer::sum)
+                ;
+
 
         //don't change code below
         StepVerifier.create(sum)
@@ -112,6 +116,7 @@ public class c2_TransformingSequence extends TransformingSequenceBase {
     public void sum_each_successive() {
         Flux<Integer> sumEach = numerical_service()
                 //todo: do your changes here
+                .scan(Integer::sum)
                 ;
 
         StepVerifier.create(sumEach)
@@ -130,6 +135,7 @@ public class c2_TransformingSequence extends TransformingSequenceBase {
     public void sequence_starts_with_zero() {
         Flux<Integer> result = numerical_service()
                 //todo: change this line only
+                .startWith(0)
                 ;
 
         StepVerifier.create(result)
