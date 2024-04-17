@@ -47,6 +47,7 @@ public class c10_Backpressure extends BackpressureBase {
     public void request_and_demand() {
         CopyOnWriteArrayList<Long> requests = new CopyOnWriteArrayList<>();
         Flux<String> messageStream = messageStream1()
+                .doOnRequest(requests::add)
                 //todo: change this line only
                 ;
 
@@ -71,6 +72,8 @@ public class c10_Backpressure extends BackpressureBase {
     public void limited_demand() {
         CopyOnWriteArrayList<Long> requests = new CopyOnWriteArrayList<>();
         Flux<String> messageStream = messageStream2()
+                .doOnRequest(requests::add)
+                .limitRate(1)
                 //todo: do your changes here
                 ;
 
@@ -94,6 +97,11 @@ public class c10_Backpressure extends BackpressureBase {
     @Test
     public void uuid_generator() {
         Flux<UUID> uuidGenerator = Flux.create(sink -> {
+            sink.onRequest(n -> {
+                for(int i = 0;  i < n; i++) {
+                    sink.next(UUID.randomUUID());
+                }
+            });
             //todo: do your changes here
         });
 
@@ -137,6 +145,7 @@ public class c10_Backpressure extends BackpressureBase {
     @Test
     public void u_wont_brake_me() {
         Flux<String> messageStream = messageStream4()
+                .onBackpressureBuffer()
                 //todo: change this line only
                 ;
 
@@ -174,12 +183,15 @@ public class c10_Backpressure extends BackpressureBase {
                     @Override
                     protected void hookOnSubscribe(Subscription subscription) {
                         sub.set(subscription);
+                        request(10);
                     }
 
                     @Override
                     protected void hookOnNext(String s) {
                         System.out.println(s);
-                        count.incrementAndGet();
+                        if (count.incrementAndGet() >= 10) {
+                            cancel();
+                        }
                     }
                     //-----------------------------------------------------
                 });
